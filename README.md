@@ -1,10 +1,10 @@
 # GeoCalc
 
-## Calculate distance and course/bearing FROM one global location TO another
+### Calculate distance and course/bearing FROM one global location TO another
 
 <br/>
 
-## Details:
+### Details:
 * Great Circle and Rhumb Line calculations
 * WGS-84 (elliptical) and Spherical models
 * Uses Vincenty *indirect* algorithm
