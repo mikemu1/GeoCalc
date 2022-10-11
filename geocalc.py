@@ -1,14 +1,19 @@
 import sys
 from time import localtime, strftime
 
-from PyQt5.QtWidgets import *
+from PyQt5.QtWidgets import QWidget, QApplication, QShortcut
+from PyQt5.QtWidgets import QLabel, QLineEdit, QComboBox
+from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout, QFormLayout
+from PyQt5.QtWidgets import QPushButton, QMessageBox, QGroupBox
 from PyQt5.QtGui import QPixmap, QFont, QKeySequence
 from PyQt5.QtCore import Qt
 
-from gengine import radius_model,  Location, GeoPath, rhumb, greatcircle, keepd
+from gengine import Location, GeoPath
+from gengine import radius_model, rhumb, greatcircle, keepd
 import style
 
-GVERSION = '10/3/22'
+GVERSION = '10.4'
+
 
 class Window(QWidget):
     def __init__(self):
@@ -21,7 +26,6 @@ class Window(QWidget):
         self.show()
         self.enterFromLocation.setFocus()   # Start entry @ from location
 
-
     def ui(self):
         self.widgets()
         self.layouts()
@@ -29,13 +33,13 @@ class Window(QWidget):
         self.quitSc = QShortcut(QKeySequence('Ctrl+Q'), self)
         self.quitSc.activated.connect(self.close)
 
-
     def widgets(self):
         self.lblImg = QLabel()
         self.lblImg.setPixmap(QPixmap("Images/sphere.png"))
         self.lblGeo = QLabel("GeoCalc ")
-        self.lblGeo.setFont(QFont('Eurostile',16))
-        self.lblGeo.setStyleSheet('font-weight: Bold; font-size: 54pt; color: blue')
+        self.lblGeo.setFont(QFont('Eurostile', 16))
+        self.lblGeo.setStyleSheet('font-weight: Bold; font-size: 54pt')
+        self.lblGeo.setStyleSheet('color: blue')
         self.cbxEllipse = QComboBox()
         self.cbxEllipse.addItems(['WGS-84', 'Sphere'])
         self.cbxEllipse.setStyleSheet('font-size: 10pt')
@@ -71,7 +75,6 @@ class Window(QWidget):
         self.btnQuit.clicked.connect(self.close)
         self.lblVers = QLabel(GVERSION)
         self.lblVers.setStyleSheet('font-size: 10pt')
-
 
     def layouts(self):
         # ------ Layout stack -----------------------
@@ -133,15 +136,12 @@ class Window(QWidget):
         self.outGroupBox.setLayout(self.outMainLayout)
         self.mainLayout.addWidget(self.outGroupBox)
         self.mainLayout.addLayout(self.revLayout)
-        
+
         self.revLayout.addStretch()
         self.revLayout.addWidget(self.lblVers)
         self.revLayout.addStretch()
-
         # -------- final setlayout ------------
         self.setLayout(self.mainLayout)
-
-
 
     def do_clear(self):
         # reset inputs
@@ -155,9 +155,7 @@ class Window(QWidget):
         self.gcDistance.clear()
         self.gcBearing.clear()
 
-
-
-    def do_home(self)->None:
+    def do_home(self) -> None:
         '''
         Intended to fill-in From entry fields with values for HOME
         Used initially to fill-in all fields to simplify testing
@@ -168,7 +166,6 @@ class Window(QWidget):
         # self.enterToLocation.setText('Jon')
         # self.enterToLat.setText('42.9514')
         # self.enterToLon.setText('-85.4311')
-
 
     def parse_entry(self, le: object, id: str) -> bool:
         '''
@@ -188,8 +185,8 @@ class Window(QWidget):
             keepd[id] = ddstring
             ddstring = ddstring[:-1]
         try:
-            dec = dms_dd(*map(float,ddstring.split()))
-            if ending in ['S', 'W']:  
+            dec = dms_dd(*map(float, ddstring.split()))
+            if ending in ['S', 'W']:
                 dec = -abs(dec)
         except ValueError:
             self.mbox("Check entry " + id, "Calculations STOP")
@@ -197,19 +194,22 @@ class Window(QWidget):
         le.setText(f'{dec:0.4f}')
         return True
 
-    
-    def do_calc(self)->None:
+    def do_calc(self) -> None:
         keepd.clear()
         keepd['GeoCalc'] = GVERSION
         keepd['When'] = strftime("%m-%d %H:%M", localtime())
         radius_model(self.cbxEllipse.currentText())
-        if not self.parse_entry(self.enterFromLat, 'FLat'):  return
-        if not self.parse_entry(self.enterFromLon, 'FLon'):  return
+        if not self.parse_entry(self.enterFromLat, 'FLat'):
+            return
+        if not self.parse_entry(self.enterFromLon, 'FLon'):
+            return
         from_loc = Location(self.enterFromLat.text(),
-                        self.enterFromLon.text())
+                            self.enterFromLon.text())
 
-        if not self.parse_entry(self.enterToLat, 'TLat'):  return
-        if not self.parse_entry(self.enterToLon, 'TLon'):  return
+        if not self.parse_entry(self.enterToLat, 'TLat'):
+            return
+        if not self.parse_entry(self.enterToLon, 'TLon'):
+            return
         to_loc = Location(self.enterToLat.text(),
                           self.enterToLon.text())
         keepd["From"] = self.enterFromLocation.text()
@@ -232,55 +232,50 @@ class Window(QWidget):
         self.gcDistance.setText(gcpath.distance)
         self.gcBearing.setText(gcpath.course)
 
-
-    def mbox(self, my_message: str, info:str = ""):
+    def mbox(self, my_message: str, info: str = ""):
         '''
         Bare messagebox with text, info text and OK buttpn
-        Concerns: 
+        Concerns:
             MAC OS does not allow window title
             QMessageBox(self) will center over main window,
-            --- but (ugly) style will be inherited from parent 
+            --- but (ugly) style will be inherited from parent
         '''
         msg = QMessageBox()
         # msg.setIcon(QMessageBox.Information) # set icon
         msg.setText(my_message)
         msg.setInformativeText(info)
         msg.setStandardButtons(QMessageBox.Ok)
-        return_value = msg.exec_() # execute and catch return 
+        return_value = msg.exec_()   # execute and catch return
         return return_value
-
-
 
     def do_save(self):
         f = self.enterFromLocation.text()
         t = self.enterToLocation.text()
         # split into pieces to avoid long string...dumb
         logname = f'{f}2{t}.log'
-        with open(logname, 'w') as f: 
-            for key, value in keepd.items(): 
-                f.write(f'{key}: {value}\n')        
-
+        with open(logname, 'w') as f:
+            for key, value in keepd.items():
+                f.write(f'{key}: {value}\n')
 
     # def save_widgets(self):
     #     '''
     #     stub for saving the complete widget list for mainLayout
     #     see vars(self) in Window init
     #     '''
-    #     with open("widgets.txt", 'w') as f: 
+    #     with open("widgets.txt", 'w') as f:
     #         f.write('GeoCalc widget dictionary\n')
     #         for key, value in self.widget_dict.items():
     #             f.write(f'{key} : {value}\n')
 
     # UI ends here -----------------------------------------------
 
-def dms_dd(degrees: float, minutes: float =0, seconds: float =0) -> float:
+
+def dms_dd(degrees: float, minutes: float = 0, seconds: float = 0) -> float:
     if degrees >= 0:
         decimal = degrees + minutes/60.0 + seconds/3600.0
     else:
         decimal = degrees - minutes/60.0 - seconds/3600.0
     return decimal
-
-
 
 
 def main():
@@ -293,4 +288,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
