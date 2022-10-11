@@ -12,7 +12,7 @@ from gengine import Location, GeoPath
 from gengine import radius_model, rhumb, greatcircle, keepd
 import style
 
-GVERSION = '10.4'
+GVERSION = '10/10/22'
 
 
 class Window(QWidget):
@@ -38,8 +38,8 @@ class Window(QWidget):
         self.lblImg.setPixmap(QPixmap("Images/sphere.png"))
         self.lblGeo = QLabel("GeoCalc ")
         self.lblGeo.setFont(QFont('Eurostile', 16))
-        self.lblGeo.setStyleSheet('font-weight: Bold; font-size: 54pt')
-        self.lblGeo.setStyleSheet('color: blue')
+        self.lblGeo.setStyleSheet('font-weight: Bold;' +
+            'font-size: 54pt; color: blue')
         self.cbxEllipse = QComboBox()
         self.cbxEllipse.addItems(['WGS-84', 'Sphere'])
         self.cbxEllipse.setStyleSheet('font-size: 10pt')
@@ -145,8 +145,10 @@ class Window(QWidget):
 
     def do_clear(self):
         # reset inputs
+        self.enterFromLocation.clear()
         self.enterFromLat.clear()
         self.enterFromLon.clear()
+        self.enterToLocation.clear()
         self.enterToLat.clear()
         self.enterToLon.clear()
         # clear outputs
