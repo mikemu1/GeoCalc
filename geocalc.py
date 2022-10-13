@@ -1,18 +1,18 @@
 import sys
 from time import localtime, strftime
 
-from PyQt5.QtWidgets import QWidget, QApplication, QShortcut
-from PyQt5.QtWidgets import QLabel, QLineEdit, QComboBox
-from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout, QFormLayout
-from PyQt5.QtWidgets import QPushButton, QMessageBox, QGroupBox
-from PyQt5.QtGui import QPixmap, QFont, QKeySequence
-from PyQt5.QtCore import Qt
+from PySide6.QtWidgets import QWidget, QApplication
+from PySide6.QtWidgets import QLabel, QLineEdit, QComboBox
+from PySide6.QtWidgets import QVBoxLayout, QHBoxLayout, QFormLayout
+from PySide6.QtWidgets import QPushButton, QMessageBox, QGroupBox
+from PySide6.QtGui import QPixmap, QFont, QKeySequence, QShortcut
+from PySide6.QtCore import Qt
 
 from gengine import Location, GeoPath
 from gengine import radius_model, rhumb, greatcircle, keepd
 import style
 
-GVERSION = '10/10/22'
+GVERSION = '10/12/22'
 
 
 class Window(QWidget):
@@ -39,12 +39,12 @@ class Window(QWidget):
         self.lblGeo = QLabel("GeoCalc ")
         self.lblGeo.setFont(QFont('Eurostile', 16))
         self.lblGeo.setStyleSheet('font-weight: Bold;' +
-            'font-size: 54pt; color: blue')
+                                  'font-size: 54pt; color: blue')
         self.cbxEllipse = QComboBox()
         self.cbxEllipse.addItems(['WGS-84', 'Sphere'])
         self.cbxEllipse.setStyleSheet('font-size: 10pt')
         self.cbxEllipse.setEditable(False)
-        self.cbxEllipse.setInsertPolicy(0)
+        self.cbxEllipse.setInsertPolicy(QComboBox.NoInsert)
         self.enterFromLocation = QLineEdit()
         self.enterFromLat = QLineEdit()
         self.enterFromLat.setPlaceholderText("±DD.ddddd")
@@ -247,7 +247,7 @@ class Window(QWidget):
         msg.setText(my_message)
         msg.setInformativeText(info)
         msg.setStandardButtons(QMessageBox.Ok)
-        return_value = msg.exec_()   # execute and catch return
+        return_value = msg.exec()   # execute and catch return
         return return_value
 
     def do_save(self):
@@ -283,9 +283,9 @@ def dms_dd(degrees: float, minutes: float = 0, seconds: float = 0) -> float:
 def main():
     app = QApplication(sys.argv)
     window = Window()
-    # print(window.width())   # Used to actual window size
+    # print(window.width())   # Used to get actual window size
     # print(window.height())
-    sys.exit(app.exec_())
+    sys.exit(app.exec())
 
 
 if __name__ == '__main__':

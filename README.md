@@ -11,7 +11,7 @@
 
 <br/><br/>
 
-**Python 3.10 and PyQt5**
+**Python 3.10 and PySide6**
 
 
 
